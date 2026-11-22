@@ -1,5 +1,5 @@
 """
-Practical 6: Fibonacci Series (Iterative Generation)
+Practical 6: Fibonacci Series (Matrix Multiplication Generation)
 Four methods: Sequential, Pool, Process, Thread
 """
 import multiprocessing as mp
@@ -9,15 +9,13 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 def fib_task(task):
-    k, iters = task
-    # In-place double-buffered matrix Fibonacci transformation (0 allocations in loop, releases GIL in C)
-    # [F(n+1), F(n); F(n), F(n-1)] = [1, 1; 1, 0]^n
-    M = np.tile(np.array([[1, 1], [1, 0]], dtype=np.int64), (k, 1, 1))
+    size, iters = task
+    # Matrix Fibonacci: [[1, 1], [1, 0]]^n
+    M = np.ones((size, 2, 2), dtype=np.int64)
+    M[:, 1, 1] = 0
     step = np.array([[1, 1], [1, 0]], dtype=np.int64)
-    buf = np.empty_like(M)
     for _ in range(iters):
-        np.matmul(M, step, out=buf)
-        M, buf = buf, M
+        M = np.matmul(M, step)
     return int(M[0, 0, 0])
 
 def proc_worker(task, q):
@@ -28,9 +26,9 @@ def thread_worker(task, results, idx):
 
 def main():
     print("=" * 60)
-    print("Practical 6: Fibonacci Series (Iterative Generation)")
+    print("Practical 6: Fibonacci Series (Matrix Power)")
     print("=" * 60)
-    tasks = [(80_000, 1500), (80_000, 1500), (80_000, 1500)]
+    tasks = [(60_000, 500), (60_000, 500), (60_000, 500)]
     
     # 1. Sequential Execution
     t0 = time.perf_counter()
@@ -40,13 +38,13 @@ def main():
     t_seq = time.perf_counter() - t0
     seq_res = [r1, r2, r3]
     
-    # 2. Multiprocessing Pool (3 workers)
+    # 2. Pool (3 workers)
     t0 = time.perf_counter()
     with mp.Pool(3) as pool:
         pool_res = pool.map(fib_task, tasks)
     t_pool = time.perf_counter() - t0
     
-    # 3. Multiprocessing Process (3 processes)
+    # 3. Process (3 processes)
     q = mp.Queue()
     procs = []
     t0 = time.perf_counter()
@@ -60,28 +58,61 @@ def main():
     t_proc = time.perf_counter() - t0
     
     # 4. Multithreading (3 threads)
-    thread_res = [None, None, None]
+    th_res = [None] * 3
     threads = []
     t0 = time.perf_counter()
-    for idx, t in enumerate(tasks):
-        th = threading.Thread(target=thread_worker, args=(t, thread_res, idx))
+    for i, t in enumerate(tasks):
+        th = threading.Thread(target=thread_worker, args=(t, th_res, i))
         threads.append(th)
         th.start()
     for th in threads:
         th.join()
     t_thread = time.perf_counter() - t0
     
-    print(f"Iterations: {tasks[0][1]} across {tasks[0][0]:,} concurrent sequences.")
-    print(f"Verification: Sequential={seq_res[0]} | Thread={thread_res[0]}")
-    print("-" * 40)
-    print(f"{'Method':<12} {'Execution Time':<18} {'Speedup':<10}")
-    print("-" * 40)
+    print(f"Fibonacci matrix batch size: {tasks[0][0]:,} across {tasks[0][1]} iterations")
+    print(f"Sample: F(iter): {seq_res[0]}")
+    print(f"[Sequential] Time: {t_seq:.4f}s")
+    print(f"[Pool]       Time: {t_pool:.4f}s")
+    print(f"[Process]    Time: {t_proc:.4f}s")
+    print(f"[Thread]     Time: {t_thread:.4f}s")
+    
     methods = ["Sequential", "Pool", "Process", "Thread"]
     times = [t_seq, t_pool, t_proc, t_thread]
     speedups = [t_seq / t for t in times]
+    
+    print("-" * 45)
+    print(f"{'Method':<12} {'Execution Time':<18} {'Speedup':<10}")
+    print("-" * 45)
     for m, t, s in zip(methods, times, speedups):
         print(f"{m:<12} {t:.4f} seconds      {s:.2f}x")
-    print("-" * 40)
+    print("-" * 45)
+    
+    colors = ['#e74c3c', '#3498db', '#2ecc71', '#9b59b6']
+    plt.figure(figsize=(8, 5))
+    bars = plt.bar(methods, times, color=colors)
+    plt.title("Execution Time Comparison (Fibonacci Series)", fontsize=13)
+    plt.ylabel("Time (seconds)", fontsize=11)
+    for bar in bars:
+        h = bar.get_height()
+        plt.text(bar.get_x() + bar.get_width()/2, h + 0.02, f"{h:.4f}s", ha='center', va='bottom', fontsize=10)
+    plt.grid(axis='y', linestyle='--', alpha=0.7)
+    plt.tight_layout()
+    plt.savefig("06_fibonacci_time.png", dpi=150)
+    plt.close()
+    
+    plt.figure(figsize=(8, 5))
+    bars = plt.bar(methods, speedups, color=colors)
+    plt.title("Speedup Comparison relative to Sequential", fontsize=13)
+    plt.ylabel("Speedup Factor (x)", fontsize=11)
+    for bar in bars:
+        h = bar.get_height()
+        plt.text(bar.get_x() + bar.get_width()/2, h + 0.02, f"{h:.2f}x", ha='center', va='bottom', fontsize=10)
+    plt.axhline(1.0, color='gray', linestyle='--', label='Baseline (1.0x)')
+    plt.grid(axis='y', linestyle='--', alpha=0.7)
+    plt.tight_layout()
+    plt.savefig("06_fibonacci_speedup.png", dpi=150)
+    plt.close()
+    print("Graphs saved as '06_fibonacci_time.png' and '06_fibonacci_speedup.png'.")
 
 if __name__ == "__main__":
     main()

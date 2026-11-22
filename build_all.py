@@ -119,72 +119,29 @@ def format_nb_section(title, aim, algorithm, code_str, output_str, time_img_path
                 {
                     "name": "stdout",
                     "output_type": "stream",
-                    "text": [line + "\n" for line in output_str.strip().split("\n")]
+                    "text": output_str.splitlines(keepends=True)
                 }
             ],
-            "source": [line + "\n" for line in code_str.strip().split("\n")]
+            "source": code_str.splitlines(keepends=True)
         },
         {
             "cell_type": "markdown",
             "metadata": {},
             "source": [
-                "### 4. Execution-Time Bar Graph\n",
-                "Displays the execution time for Sequential, Pool, Process, and Thread with individual color bars.\n"
-            ]
-        },
-        {
-            "cell_type": "code",
-            "execution_count": 2,
-            "metadata": {},
-            "outputs": [
-                {
-                    "data": {
-                        "image/png": time_b64,
-                        "text/plain": ["<Figure size 750x420 with 1 Axes>"]
-                    },
-                    "metadata": {},
-                    "output_type": "display_data"
-                }
-            ],
-            "source": [
-                "from IPython.display import Image, display\n",
-                f"display(Image(filename='{os.path.basename(time_img_path)}'))\n"
-            ]
-        },
-        {
-            "cell_type": "markdown",
-            "metadata": {},
-            "source": [
-                "### 5. Speedup Line Graph\n",
-                "Speedup is calculated using:\n",
-                "$$\\text{Speedup} = \\frac{\\text{Sequential Time}}{\\text{Method Time}}$$\n",
-                "Sequential baseline is exactly **1.00x**.\n"
-            ]
-        },
-        {
-            "cell_type": "code",
-            "execution_count": 3,
-            "metadata": {},
-            "outputs": [
-                {
-                    "data": {
-                        "image/png": speedup_b64,
-                        "text/plain": ["<Figure size 750x420 with 1 Axes>"]
-                    },
-                    "metadata": {},
-                    "output_type": "display_data"
-                }
-            ],
-            "source": [
-                "from IPython.display import Image, display\n",
-                f"display(Image(filename='{os.path.basename(speedup_img_path)}'))\n"
+                "### 4. Output Graphs\n",
+                "\n",
+                "#### A. Execution Time Comparison\n",
+                f"![Execution Time](data:image/png;base64,{time_b64})\n",
+                "\n",
+                "#### B. Speedup Comparison relative to Sequential\n",
+                f"![Speedup](data:image/png;base64,{speedup_b64})\n"
             ]
         }
     ]
 
 def main():
     print("=" * 70)
-    print("STARTING COMPLETE PARALLEL COMPUTING LAB GENERATION & BENCHMARKING")
+    print("PARALLEL COMPUTING LAB: COMPLETE WORKSPACE SYNCHRONIZATION & BUILD")
     print("=" * 70)
     
     questions = [
@@ -196,7 +153,7 @@ def main():
             "speedup_img": "01_odd_even_speedup.png",
             "title": "Practical 1: Odd and Even Numbers Classification",
             "aim": "To classify a large set of integers into odd and even numbers using Sequential processing, multiprocessing.Pool (3 workers), multiprocessing.Process (3 processes), and Multithreading (3 threads), demonstrating authentic parallel speedup.",
-            "algo": "1. Generate an integer dataset of 120,000,000 numbers in contiguous partitions.<br>2. Vectorized bitwise parity checks in L3-cache-sized blocks release the GIL in C.<br>3. Sequential: evaluate all partitions sequentially in a single process.<br>4. Pool: map `classify_range` across 3 worker processes using `mp.Pool(3)`.<br>5. Process: spawn 3 separate `mp.Process` workers communicating via `mp.Queue`.<br>6. Thread: launch 3 concurrent threads using `threading.Thread`.<br>7. Measure execution times and compute speedup relative to Sequential baseline."
+            "algo": "1. Divide integer dataset into 3 contiguous partitions.<br>2. Check parity using standard modulo / odd check (`arr % 2 != 0`).<br>3. Sequential: evaluate all partitions sequentially in a single process.<br>4. Pool: map `classify_range` across 3 worker processes using `mp.Pool(3)`.<br>5. Process: spawn 3 separate `mp.Process` workers communicating via `mp.Queue`.<br>6. Thread: launch 3 concurrent threads using `threading.Thread`.<br>7. Measure execution times and compute speedup relative to Sequential baseline."
         },
         {
             "id": 2,
@@ -206,7 +163,7 @@ def main():
             "speedup_img": "02_factorial_speedup.png",
             "title": "Practical 2: Factorial Calculation of N Numbers",
             "aim": "To compute log-factorials across 3 independent tasks using Sequential execution, multiprocessing.Pool (3 workers), multiprocessing.Process (3 processes), and Multithreading (3 threads), evaluating parallel performance without artificial delays.",
-            "algo": "1. Define 3 independent tasks calculating ln(100,000,000!) via chunked sum of logarithms in compiled C.<br>2. Sequential: calculate the 3 tasks sequentially.<br>3. Pool: distribute tasks to 3 worker processes via `pool.map()`.<br>4. Process: spawn 3 explicit `mp.Process` workers and collect results with `mp.Queue`.<br>5. Thread: execute 3 concurrent `threading.Thread` instances.<br>6. Verify numerical results and compare execution times."
+            "algo": "1. Define 3 independent tasks calculating ln(n!) = sum(ln(i)).<br>2. Sequential: calculate the 3 tasks sequentially.<br>3. Pool: distribute tasks to 3 worker processes via `pool.map()`.<br>4. Process: spawn 3 explicit `mp.Process` workers and collect results with `mp.Queue`.<br>5. Thread: execute 3 concurrent `threading.Thread` instances.<br>6. Verify numerical results and compare execution times."
         },
         {
             "id": 3,
@@ -216,7 +173,7 @@ def main():
             "speedup_img": "03_max_min_speedup.png",
             "title": "Practical 3: Maximum and Minimum Elements in an Array (Pattern 1)",
             "aim": "To find maximum and minimum elements from a large array across 4 methods: Sequential, multiprocessing.Pool, multiprocessing.Process, and Multithreading.",
-            "algo": "1. Create an array workload of 50,000,000 integers with arithmetic transformations in compiled C.<br>2. Sequential: execute the complete task sequentially 3 times.<br>3. Pool: pass the tasks across 3 worker processes in `mp.Pool(3)`.<br>4. Process: spawn 3 separate `mp.Process` instances.<br>5. Thread: launch 3 concurrent worker threads.<br>6. Record execution times and compute speedups."
+            "algo": "1. Create array tasks of integers using random number generation.<br>2. Sequential: execute the 3 tasks sequentially.<br>3. Pool: pass the tasks across 3 worker processes in `mp.Pool(3)`.<br>4. Process: spawn 3 separate `mp.Process` instances.<br>5. Thread: launch 3 concurrent worker threads.<br>6. Record execution times and compute speedups."
         },
         {
             "id": 4,
@@ -225,8 +182,8 @@ def main():
             "time_img": "04_matrix_addition_time.png",
             "speedup_img": "04_matrix_addition_speedup.png",
             "title": "Practical 4: Matrix Addition (Pattern 2 + Multithreading)",
-            "aim": "To add three independent pairs of large 6500x6500 matrices using Sequential, multiprocessing.Pool, multiprocessing.Process, and Multithreading.",
-            "algo": "1. Generate three independent pairs of 6500x6500 integer matrices.<br>2. Execute element-wise additions and arithmetic transformations in compiled C.<br>3. Sequential: add Pair 1 -> Pair 2 -> Pair 3 sequentially.<br>4. Pool: distribute across 3 workers in `mp.Pool(3)`.<br>5. Process: spawn 3 independent `mp.Process` instances.<br>6. Thread: launch 3 concurrent `threading.Thread` workers.<br>7. Compare wall-clock execution times and speedups."
+            "aim": "To add three independent pairs of large matrices using Sequential, multiprocessing.Pool, multiprocessing.Process, and Multithreading.",
+            "algo": "1. Generate three independent pairs of integer matrices.<br>2. Perform element-wise addition C = A + B.<br>3. Sequential: add Pair 1 -> Pair 2 -> Pair 3 sequentially.<br>4. Pool: distribute across 3 workers in `mp.Pool(3)`.<br>5. Process: spawn 3 independent `mp.Process` instances.<br>6. Thread: launch 3 concurrent `threading.Thread` workers.<br>7. Compare wall-clock execution times and speedups."
         },
         {
             "id": 5,
@@ -236,7 +193,7 @@ def main():
             "speedup_img": "05_matrix_multiplication_speedup.png",
             "title": "Practical 5: Matrix Multiplication (Pattern 2)",
             "aim": "To multiply three independent pairs of matrices of dimension 720x720 using Sequential, multiprocessing.Pool, multiprocessing.Process, and Multithreading.",
-            "algo": "1. Generate three independent pairs of 720x720 integer matrices.<br>2. Execute matrix multiplication in compiled C/BLAS with single-thread BLAS environment settings.<br>3. Sequential: multiply Pair 1 -> Pair 2 -> Pair 3.<br>4. Pool: distribute to 3 workers in `mp.Pool(3)`.<br>5. Process: compute using 3 separate `mp.Process` instances.<br>6. Thread: compute concurrently with 3 `threading.Thread` workers.<br>7. Benchmark execution times and compute speedup."
+            "algo": "1. Generate three independent pairs of 720x720 integer matrices.<br>2. Execute matrix multiplication `np.matmul(A, B)`.<br>3. Sequential: multiply Pair 1 -> Pair 2 -> Pair 3 sequentially.<br>4. Pool: distribute across 3 workers in `mp.Pool(3)`.<br>5. Process: multiply concurrently using 3 `mp.Process` instances.<br>6. Thread: multiply concurrently using 3 `threading.Thread` workers.<br>7. Verify product consistency and evaluate speedup."
         },
         {
             "id": 6,
@@ -244,9 +201,9 @@ def main():
             "nb_file": "06_fibonacci.ipynb",
             "time_img": "06_fibonacci_time.png",
             "speedup_img": "06_fibonacci_speedup.png",
-            "title": "Practical 6: Fibonacci Series (Iterative Generation)",
-            "aim": "To compute Fibonacci series iteratively across 80,000 concurrent sequences using 2x2 matrix transformations comparing Sequential, multiprocessing.Pool, multiprocessing.Process, and Multithreading.",
-            "algo": "1. Perform double-buffered 2x2 matrix transformations in compiled C across 80,000 sequences.<br>2. Sequential: execute all iterations sequentially.<br>3. Pool: parallelize across 3 workers in `mp.Pool(3)`.<br>4. Process: compute across 3 independent `mp.Process` instances.<br>5. Thread: execute concurrently across 3 `threading.Thread` workers.<br>6. Compare wall-clock times and speedup ratios."
+            "title": "Practical 6: Fibonacci Series (Matrix Power)",
+            "aim": "To calculate Fibonacci terms across 3 tasks using matrix power formulation with Sequential, multiprocessing.Pool, multiprocessing.Process, and Multithreading.",
+            "algo": "1. Formulate Fibonacci recurrence using 2x2 matrix multiplication: [[1, 1], [1, 0]]^n.<br>2. Sequential: compute 3 tasks sequentially.<br>3. Pool: map across 3 workers in `mp.Pool(3)`.<br>4. Process: compute concurrently using 3 `mp.Process` workers.<br>5. Thread: compute concurrently using 3 `threading.Thread` workers.<br>6. Compare execution times and verify speedup."
         },
         {
             "id": 7,
@@ -255,8 +212,8 @@ def main():
             "time_img": "07_prime_numbers_time.png",
             "speedup_img": "07_prime_numbers_speedup.png",
             "title": "Practical 7: Prime Number Checking in N Natural Numbers",
-            "aim": "To identify prime numbers up to 2,500,000 using vectorized trial division comparing Sequential, multiprocessing.Pool, multiprocessing.Process, and Multithreading.",
-            "algo": "1. Partition the range [1, 2,500,000] into 3 contiguous segments.<br>2. Execute vectorized trial division in compiled C releasing the GIL.<br>3. Sequential: check Segment 1 -> Segment 2 -> Segment 3.<br>4. Pool: map across 3 workers in `mp.Pool(3)`.<br>5. Process: spawn 3 independent `mp.Process` instances.<br>6. Thread: launch 3 concurrent `threading.Thread` workers.<br>7. Verify prime count consistency and compare execution times."
+            "aim": "To count prime numbers up to N across 4 execution methods: Sequential, multiprocessing.Pool, multiprocessing.Process, and Multithreading.",
+            "algo": "1. Divide range up to N into 3 contiguous segments.<br>2. Check prime numbers using vectorized trial division by odd numbers up to sqrt(end).<br>3. Sequential: count primes in all segments sequentially.<br>4. Pool: distribute segments to 3 workers in `mp.Pool(3)`.<br>5. Process: spawn 3 independent `mp.Process` instances.<br>6. Thread: execute 3 concurrent `threading.Thread` workers.<br>7. Verify total prime count and measure speedup."
         },
         {
             "id": 8,
@@ -265,8 +222,8 @@ def main():
             "time_img": "08_bubble_sort_time.png",
             "speedup_img": "08_bubble_sort_speedup.png",
             "title": "Practical 8: Bubble Sort on Three Different Arrays (Pattern 2)",
-            "aim": "To perform multi-pass array sorting across three large arrays (6,000,000 elements each) using Sequential, multiprocessing.Pool, multiprocessing.Process, and Multithreading.",
-            "algo": "1. Generate three independent arrays containing 6,000,000 elements each.<br>2. Execute multi-pass sorting in compiled C releasing the GIL.<br>3. Sequential: sort Array 1 -> Array 2 -> Array 3.<br>4. Pool: distribute across 3 workers in `mp.Pool(3)`.<br>5. Process: sort concurrently using 3 `mp.Process` instances.<br>6. Thread: sort concurrently using 3 `threading.Thread` workers.<br>7. Verify sorted results and plot execution-time and speedup graphs."
+            "aim": "To sort three large arrays using Sequential, multiprocessing.Pool, multiprocessing.Process, and Multithreading.",
+            "algo": "1. Generate three independent arrays containing random integers.<br>2. Perform multi-pass sorting and reversing.<br>3. Sequential: sort Array 1 -> Array 2 -> Array 3.<br>4. Pool: distribute across 3 workers in `mp.Pool(3)`.<br>5. Process: sort concurrently using 3 `mp.Process` instances.<br>6. Thread: sort concurrently using 3 `threading.Thread` workers.<br>7. Verify sorted results and plot execution-time and speedup graphs."
         },
         {
             "id": 9,
@@ -275,8 +232,8 @@ def main():
             "time_img": "09_array_sum_time.png",
             "speedup_img": "09_array_sum_speedup.png",
             "title": "Practical 9: Addition/Sum of Elements of an Array (Pattern 2)",
-            "aim": "To compute element-wise transformed sum across three independent arrays (50,000,000 elements each) comparing Sequential, multiprocessing.Pool, multiprocessing.Process, and Multithreading.",
-            "algo": "1. Generate three independent workloads of 50,000,000 elements partitioned into L3-cache-friendly blocks.<br>2. Execute deterministic arithmetic hashing and summation in compiled C.<br>3. Sequential: sum Array 1 -> Array 2 -> Array 3.<br>4. Pool: distribute across 3 workers in `mp.Pool(3)`.<br>5. Process: sum concurrently using 3 `mp.Process` instances.<br>6. Thread: sum concurrently using 3 `threading.Thread` workers.<br>7. Verify sum consistency and compare execution times."
+            "aim": "To compute the sum of elements across three independent arrays comparing Sequential, multiprocessing.Pool, multiprocessing.Process, and Multithreading.",
+            "algo": "1. Generate three independent arrays.<br>2. Compute array sum using `np.sum()`.<br>3. Sequential: sum Array 1 -> Array 2 -> Array 3.<br>4. Pool: distribute across 3 workers in `mp.Pool(3)`.<br>5. Process: sum concurrently using 3 `mp.Process` instances.<br>6. Thread: sum concurrently using 3 `threading.Thread` workers.<br>7. Verify sum consistency and compare execution times."
         },
         {
             "id": 10,
@@ -285,8 +242,8 @@ def main():
             "time_img": "10_matrix_transpose_time.png",
             "speedup_img": "10_matrix_transpose_speedup.png",
             "title": "Practical 10: Matrix Transpose of Three Different Matrices (Pattern 2)",
-            "aim": "To perform matrix transpose combined with coordinate transformations on three 6500x6500 matrices using Sequential, multiprocessing.Pool, multiprocessing.Process, and Multithreading.",
-            "algo": "1. Generate three independent matrices of dimension 6500x6500.<br>2. Execute arithmetic coordinate transformations and matrix transposition in compiled C.<br>3. Sequential: transpose Matrix 1 -> Matrix 2 -> Matrix 3.<br>4. Pool: transpose in parallel using `mp.Pool(3)`.<br>5. Process: transpose concurrently using 3 independent `mp.Process` instances.<br>6. Thread: transpose concurrently using 3 `threading.Thread` workers.<br>7. Benchmark execution times and plot comparative speedups."
+            "aim": "To perform matrix transpose on three independent matrices using Sequential, multiprocessing.Pool, multiprocessing.Process, and Multithreading.",
+            "algo": "1. Generate three independent matrices.<br>2. Perform matrix transposition `matrix.T.copy()`.<br>3. Sequential: transpose Matrix 1 -> Matrix 2 -> Matrix 3.<br>4. Pool: transpose in parallel using `mp.Pool(3)`.<br>5. Process: transpose concurrently using 3 independent `mp.Process` instances.<br>6. Thread: transpose concurrently using 3 `threading.Thread` workers.<br>7. Benchmark execution times and plot comparative speedups."
         }
     ]
     
@@ -306,7 +263,7 @@ def main():
                 "3. [Practical 3: Maximum and Minimum in an Array (Pattern 1)](#practical-3-maximum-and-minimum-elements-in-an-array-pattern-1)\n",
                 "4. [Practical 4: Matrix Addition (Pattern 2 + Multithreading)](#practical-4-matrix-addition-pattern-2--multithreading)\n",
                 "5. [Practical 5: Matrix Multiplication (Pattern 2)](#practical-5-matrix-multiplication-pattern-2)\n",
-                "6. [Practical 6: Fibonacci Series (Iterative Generation)](#practical-6-fibonacci-series-iterative-generation)\n",
+                "6. [Practical 6: Fibonacci Series (Matrix Power)](#practical-6-fibonacci-series-matrix-power)\n",
                 "7. [Practical 7: Prime Number Checking](#practical-7-prime-number-checking-in-n-natural-numbers)\n",
                 "8. [Practical 8: Bubble Sort (Pattern 2)](#practical-8-bubble-sort-on-three-different-arrays-pattern-2)\n",
                 "9. [Practical 9: Addition/Sum of Array Elements (Pattern 2)](#practical-9-additionsum-of-elements-of-an-array-pattern-2)\n",
