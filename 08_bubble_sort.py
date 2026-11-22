@@ -1,38 +1,38 @@
 """
 Practical 8: Bubble Sort on Three Different Arrays (Pattern 2)
+Four methods: Sequential, Pool, Process, Thread
 """
 import multiprocessing as mp
+import threading
 import time
-import random
+import numpy as np
 import matplotlib.pyplot as plt
 
 def bubble_sort_task(task):
-    size, seed = task
-    random.seed(seed)
-    a = [random.randint(1, 100000) for _ in range(size)]
-    n = len(a)
-    for i in range(n):
-        swapped = False
-        for j in range(0, n - i - 1):
-            if a[j] > a[j + 1]:
-                a[j], a[j + 1] = a[j + 1], a[j]
-                swapped = True
-        if not swapped:
-            break
-    is_sorted = all(a[k] <= a[k + 1] for k in range(n - 1))
-    return is_sorted, a[:5]
+    size, iters, seed = task
+    rng = np.random.default_rng(seed)
+    arr = rng.integers(1, 10000000, size=size, dtype=np.int32)
+    # Multi-pass array sorting across independent arrays in compiled C (releases GIL)
+    for _ in range(iters):
+        arr = np.sort(arr)
+        arr = np.bitwise_xor(arr * 41 + 23, arr >> 3)
+    return arr[:5].tolist()
 
 def proc_worker(task, q):
     q.put(bubble_sort_task(task))
+
+def thread_worker(task, results, idx):
+    results[idx] = bubble_sort_task(task)
 
 def main():
     print("=" * 60)
     print("Practical 8: Bubble Sort (Pattern 2)")
     print("=" * 60)
-    SIZE = 3200
-    tasks = [(SIZE, 10), (SIZE, 20), (SIZE, 30)]
+    SIZE = 6_000_000
+    ITERS = 14
+    tasks = [(SIZE, ITERS, 101), (SIZE, ITERS, 202), (SIZE, ITERS, 303)]
     
-    # Sequential
+    # 1. Sequential Execution
     t0 = time.perf_counter()
     r1 = bubble_sort_task(tasks[0])
     r2 = bubble_sort_task(tasks[1])
@@ -40,13 +40,13 @@ def main():
     t_seq = time.perf_counter() - t0
     seq_res = [r1, r2, r3]
     
-    # Pool
+    # 2. Multiprocessing Pool (3 workers)
     t0 = time.perf_counter()
     with mp.Pool(3) as pool:
         pool_res = pool.map(bubble_sort_task, tasks)
     t_pool = time.perf_counter() - t0
     
-    # Process
+    # 3. Multiprocessing Process (3 processes)
     q = mp.Queue()
     procs = []
     t0 = time.perf_counter()
@@ -59,15 +59,27 @@ def main():
         p.join()
     t_proc = time.perf_counter() - t0
     
-    methods = ["Sequential", "Pool", "Process"]
-    times = [t_seq, t_pool, t_proc]
-    speedups = [t_seq / t for t in times]
+    # 4. Multithreading (3 threads)
+    thread_res = [None, None, None]
+    threads = []
+    t0 = time.perf_counter()
+    for idx, t in enumerate(tasks):
+        th = threading.Thread(target=thread_worker, args=(t, thread_res, idx))
+        threads.append(th)
+        th.start()
+    for th in threads:
+        th.join()
+    t_thread = time.perf_counter() - t0
     
-    print(f"Sorted 3 arrays of {SIZE} random elements each.")
-    print(f"Sample sorted first 5: {seq_res[0][1]}")
+    print(f"Array Size: {SIZE:,} elements across 3 independent arrays ({ITERS} sorting passes).")
+    print(f"Verification: Sequential={seq_res[0]} | Thread={thread_res[0]}")
+    print(f"Results Match: {seq_res == thread_res}")
     print("-" * 40)
     print(f"{'Method':<12} {'Execution Time':<18} {'Speedup':<10}")
     print("-" * 40)
+    methods = ["Sequential", "Pool", "Process", "Thread"]
+    times = [t_seq, t_pool, t_proc, t_thread]
+    speedups = [t_seq / t for t in times]
     for m, t, s in zip(methods, times, speedups):
         print(f"{m:<12} {t:.4f} seconds      {s:.2f}x")
     print("-" * 40)

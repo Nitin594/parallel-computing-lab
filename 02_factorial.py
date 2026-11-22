@@ -1,72 +1,84 @@
 """
 Practical 2: Program to calculate factorial of N numbers
+Pattern: Chunked calculation of ln(n!) for 3 independent tasks
+Four methods: Sequential, Pool, Process, Thread
 """
 import multiprocessing as mp
+import threading
 import time
-import random
+import numpy as np
 import matplotlib.pyplot as plt
 
-def factorial_chunk(numbers):
-    res = []
-    for n in numbers:
-        fact = 1
-        for i in range(2, n + 1):
-            fact = (fact * i) % 1000000007
-        res.append(fact)
-    return res
+def factorial_task(n):
+    total = 0.0
+    chunk_size = 1_000_000
+    for s in range(1, n + 1, chunk_size):
+        e = min(s + chunk_size, n + 1)
+        arr = np.arange(s, e, dtype=np.float64)
+        total += float(np.sum(np.log(arr)))
+    return total
 
-def proc_worker(numbers, q):
-    q.put(factorial_chunk(numbers))
+def proc_worker(n, q):
+    q.put(factorial_task(n))
+
+def thread_worker(n, results, idx):
+    results[idx] = factorial_task(n)
 
 def main():
     print("=" * 60)
     print("Practical 2: Factorial of N Numbers")
     print("=" * 60)
-    random.seed(42)
-    dataset = [random.randint(16000, 24000) for _ in range(900)]
-    cs = (len(dataset) + 2) // 3
-    chunks = [dataset[i:i+cs] for i in range(0, len(dataset), cs)]
+    N = 100_000_000
+    tasks = [N, N, N]
     
-    # Sequential
+    # 1. Sequential Execution
     t0 = time.perf_counter()
-    r1 = factorial_chunk(chunks[0])
-    r2 = factorial_chunk(chunks[1])
-    r3 = factorial_chunk(chunks[2])
+    r1 = factorial_task(tasks[0])
+    r2 = factorial_task(tasks[1])
+    r3 = factorial_task(tasks[2])
     t_seq = time.perf_counter() - t0
-    res_seq = r1 + r2 + r3
+    seq_res = [r1, r2, r3]
     
-    # Pool
+    # 2. Multiprocessing Pool (3 workers)
     t0 = time.perf_counter()
     with mp.Pool(3) as pool:
-        p_res = pool.map(factorial_chunk, chunks)
+        p_res = pool.map(factorial_task, tasks)
     t_pool = time.perf_counter() - t0
-    res_pool = [item for sub in p_res for item in sub]
     
-    # Process
+    # 3. Multiprocessing Process (3 processes)
     q = mp.Queue()
     procs = []
     t0 = time.perf_counter()
-    for c in chunks:
-        p = mp.Process(target=proc_worker, args=(c, q))
+    for t in tasks:
+        p = mp.Process(target=proc_worker, args=(t, q))
         procs.append(p)
         p.start()
-    pr_res = [q.get() for _ in range(3)]
+    proc_res = [q.get() for _ in range(3)]
     for p in procs:
         p.join()
     t_proc = time.perf_counter() - t0
-    res_proc = [item for sub in pr_res for item in sub]
     
-    print(f"Computed factorials for {len(dataset)} numbers.")
-    print(f"Sample: {dataset[0]}! % 1,000,000,007 = {res_seq[0]:,}")
-    print(f"All Results Match: {res_seq == res_pool == res_proc}")
+    # 4. Multithreading (3 threads)
+    thread_res = [None, None, None]
+    threads = []
+    t0 = time.perf_counter()
+    for idx, t in enumerate(tasks):
+        th = threading.Thread(target=thread_worker, args=(t, thread_res, idx))
+        threads.append(th)
+        th.start()
+    for th in threads:
+        th.join()
+    t_thread = time.perf_counter() - t0
     
-    methods = ["Sequential", "Pool", "Process"]
-    times = [t_seq, t_pool, t_proc]
-    speedups = [t_seq / t for t in times]
-    
+    print(f"Calculated ln({N:,}!) across 3 independent tasks.")
+    print(f"Sample ln(N!): {seq_res[0]:,.2f}")
+    print(f"Results Match (Sequential == Thread): {seq_res[0] == thread_res[0]}")
     print("-" * 40)
     print(f"{'Method':<12} {'Execution Time':<18} {'Speedup':<10}")
     print("-" * 40)
+    methods = ["Sequential", "Pool", "Process", "Thread"]
+    times = [t_seq, t_pool, t_proc, t_thread]
+    speedups = [t_seq / t for t in times]
     for m, t, s in zip(methods, times, speedups):
         print(f"{m:<12} {t:.4f} seconds      {s:.2f}x")
     print("-" * 40)
