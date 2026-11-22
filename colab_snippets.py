@@ -112,14 +112,17 @@ if __name__ == '__main__':
     plt.show()
     
     fig, ax = plt.subplots(figsize=(8, 4.5))
-    bars = ax.bar(methods, speedups, color=colors, width=0.55)
+    ax.plot(methods, speedups, marker='o', linewidth=2.5, markersize=8, color='#2980b9', label='Speedup')
     ax.set_title("Practical 1: Speedup Factor relative to Sequential", fontsize=13, fontweight='bold')
+    ax.set_xlabel("Method", fontsize=11)
     ax.set_ylabel("Speedup Factor (x)", fontsize=11)
-    for bar in bars:
-        h = bar.get_height()
-        ax.text(bar.get_x() + bar.get_width()/2, h + 0.02, f"{h:.2f}x", ha='center', va='bottom', fontsize=10)
+    max_s = max(speedups) if speedups else 1.0
+    ax.set_ylim(0, max_s * 1.25)
+    for i, s in enumerate(speedups):
+        ax.text(i, s + (max_s * 0.02), f"{s:.2f}x", ha=\'center\', va=\'bottom\', fontsize=10, fontweight=\'bold\')
     ax.axhline(1.0, color='gray', linestyle='--', label='Baseline (1.0x)')
-    ax.grid(axis='y', linestyle='--', alpha=0.7)
+    ax.grid(True, linestyle='--', alpha=0.7)
+    ax.legend(loc='upper left')
     plt.tight_layout()
     plt.show()
 '''
@@ -220,14 +223,17 @@ if __name__ == '__main__':
     plt.show()
     
     fig, ax = plt.subplots(figsize=(8, 4.5))
-    bars = ax.bar(methods, speedups, color=colors, width=0.55)
+    ax.plot(methods, speedups, marker='o', linewidth=2.5, markersize=8, color='#2980b9', label='Speedup')
     ax.set_title("Practical 2: Speedup Factor relative to Sequential", fontsize=13, fontweight='bold')
+    ax.set_xlabel("Method", fontsize=11)
     ax.set_ylabel("Speedup Factor (x)", fontsize=11)
-    for bar in bars:
-        h = bar.get_height()
-        ax.text(bar.get_x() + bar.get_width()/2, h + 0.02, f"{h:.2f}x", ha='center', va='bottom', fontsize=10)
+    max_s = max(speedups) if speedups else 1.0
+    ax.set_ylim(0, max_s * 1.25)
+    for i, s in enumerate(speedups):
+        ax.text(i, s + (max_s * 0.02), f"{s:.2f}x", ha=\'center\', va=\'bottom\', fontsize=10, fontweight=\'bold\')
     ax.axhline(1.0, color='gray', linestyle='--', label='Baseline (1.0x)')
-    ax.grid(axis='y', linestyle='--', alpha=0.7)
+    ax.grid(True, linestyle='--', alpha=0.7)
+    ax.legend(loc='upper left')
     plt.tight_layout()
     plt.show()
 '''
@@ -327,14 +333,17 @@ if __name__ == '__main__':
     plt.show()
     
     fig, ax = plt.subplots(figsize=(8, 4.5))
-    bars = ax.bar(methods, speedups, color=colors, width=0.55)
+    ax.plot(methods, speedups, marker='o', linewidth=2.5, markersize=8, color='#2980b9', label='Speedup')
     ax.set_title("Practical 3: Speedup Factor relative to Sequential", fontsize=13, fontweight='bold')
+    ax.set_xlabel("Method", fontsize=11)
     ax.set_ylabel("Speedup Factor (x)", fontsize=11)
-    for bar in bars:
-        h = bar.get_height()
-        ax.text(bar.get_x() + bar.get_width()/2, h + 0.02, f"{h:.2f}x", ha='center', va='bottom', fontsize=10)
+    max_s = max(speedups) if speedups else 1.0
+    ax.set_ylim(0, max_s * 1.25)
+    for i, s in enumerate(speedups):
+        ax.text(i, s + (max_s * 0.02), f"{s:.2f}x", ha=\'center\', va=\'bottom\', fontsize=10, fontweight=\'bold\')
     ax.axhline(1.0, color='gray', linestyle='--', label='Baseline (1.0x)')
-    ax.grid(axis='y', linestyle='--', alpha=0.7)
+    ax.grid(True, linestyle='--', alpha=0.7)
+    ax.legend(loc='upper left')
     plt.tight_layout()
     plt.show()
 '''
@@ -436,14 +445,17 @@ if __name__ == '__main__':
     plt.show()
     
     fig, ax = plt.subplots(figsize=(8, 4.5))
-    bars = ax.bar(methods, speedups, color=colors, width=0.55)
+    ax.plot(methods, speedups, marker='o', linewidth=2.5, markersize=8, color='#2980b9', label='Speedup')
     ax.set_title("Practical 4: Speedup Factor relative to Sequential", fontsize=13, fontweight='bold')
+    ax.set_xlabel("Method", fontsize=11)
     ax.set_ylabel("Speedup Factor (x)", fontsize=11)
-    for bar in bars:
-        h = bar.get_height()
-        ax.text(bar.get_x() + bar.get_width()/2, h + 0.02, f"{h:.2f}x", ha='center', va='bottom', fontsize=10)
+    max_s = max(speedups) if speedups else 1.0
+    ax.set_ylim(0, max_s * 1.25)
+    for i, s in enumerate(speedups):
+        ax.text(i, s + (max_s * 0.02), f"{s:.2f}x", ha=\'center\', va=\'bottom\', fontsize=10, fontweight=\'bold\')
     ax.axhline(1.0, color='gray', linestyle='--', label='Baseline (1.0x)')
-    ax.grid(axis='y', linestyle='--', alpha=0.7)
+    ax.grid(True, linestyle='--', alpha=0.7)
+    ax.legend(loc='upper left')
     plt.tight_layout()
     plt.show()
 '''
@@ -551,14 +563,17 @@ if __name__ == '__main__':
     plt.show()
     
     fig, ax = plt.subplots(figsize=(8, 4.5))
-    bars = ax.bar(methods, speedups, color=colors, width=0.55)
+    ax.plot(methods, speedups, marker='o', linewidth=2.5, markersize=8, color='#2980b9', label='Speedup')
     ax.set_title("Practical 5: Speedup Factor relative to Sequential", fontsize=13, fontweight='bold')
+    ax.set_xlabel("Method", fontsize=11)
     ax.set_ylabel("Speedup Factor (x)", fontsize=11)
-    for bar in bars:
-        h = bar.get_height()
-        ax.text(bar.get_x() + bar.get_width()/2, h + 0.02, f"{h:.2f}x", ha='center', va='bottom', fontsize=10)
+    max_s = max(speedups) if speedups else 1.0
+    ax.set_ylim(0, max_s * 1.25)
+    for i, s in enumerate(speedups):
+        ax.text(i, s + (max_s * 0.02), f"{s:.2f}x", ha=\'center\', va=\'bottom\', fontsize=10, fontweight=\'bold\')
     ax.axhline(1.0, color='gray', linestyle='--', label='Baseline (1.0x)')
-    ax.grid(axis='y', linestyle='--', alpha=0.7)
+    ax.grid(True, linestyle='--', alpha=0.7)
+    ax.legend(loc='upper left')
     plt.tight_layout()
     plt.show()
 '''
@@ -663,14 +678,17 @@ if __name__ == '__main__':
     plt.show()
     
     fig, ax = plt.subplots(figsize=(8, 4.5))
-    bars = ax.bar(methods, speedups, color=colors, width=0.55)
+    ax.plot(methods, speedups, marker='o', linewidth=2.5, markersize=8, color='#2980b9', label='Speedup')
     ax.set_title("Practical 6: Speedup Factor relative to Sequential", fontsize=13, fontweight='bold')
+    ax.set_xlabel("Method", fontsize=11)
     ax.set_ylabel("Speedup Factor (x)", fontsize=11)
-    for bar in bars:
-        h = bar.get_height()
-        ax.text(bar.get_x() + bar.get_width()/2, h + 0.02, f"{h:.2f}x", ha='center', va='bottom', fontsize=10)
+    max_s = max(speedups) if speedups else 1.0
+    ax.set_ylim(0, max_s * 1.25)
+    for i, s in enumerate(speedups):
+        ax.text(i, s + (max_s * 0.02), f"{s:.2f}x", ha=\'center\', va=\'bottom\', fontsize=10, fontweight=\'bold\')
     ax.axhline(1.0, color='gray', linestyle='--', label='Baseline (1.0x)')
-    ax.grid(axis='y', linestyle='--', alpha=0.7)
+    ax.grid(True, linestyle='--', alpha=0.7)
+    ax.legend(loc='upper left')
     plt.tight_layout()
     plt.show()
 '''
@@ -780,14 +798,17 @@ if __name__ == '__main__':
     plt.show()
     
     fig, ax = plt.subplots(figsize=(8, 4.5))
-    bars = ax.bar(methods, speedups, color=colors, width=0.55)
+    ax.plot(methods, speedups, marker='o', linewidth=2.5, markersize=8, color='#2980b9', label='Speedup')
     ax.set_title("Practical 7: Speedup Factor relative to Sequential", fontsize=13, fontweight='bold')
+    ax.set_xlabel("Method", fontsize=11)
     ax.set_ylabel("Speedup Factor (x)", fontsize=11)
-    for bar in bars:
-        h = bar.get_height()
-        ax.text(bar.get_x() + bar.get_width()/2, h + 0.02, f"{h:.2f}x", ha='center', va='bottom', fontsize=10)
+    max_s = max(speedups) if speedups else 1.0
+    ax.set_ylim(0, max_s * 1.25)
+    for i, s in enumerate(speedups):
+        ax.text(i, s + (max_s * 0.02), f"{s:.2f}x", ha=\'center\', va=\'bottom\', fontsize=10, fontweight=\'bold\')
     ax.axhline(1.0, color='gray', linestyle='--', label='Baseline (1.0x)')
-    ax.grid(axis='y', linestyle='--', alpha=0.7)
+    ax.grid(True, linestyle='--', alpha=0.7)
+    ax.legend(loc='upper left')
     plt.tight_layout()
     plt.show()
 '''
@@ -893,14 +914,17 @@ if __name__ == '__main__':
     plt.show()
     
     fig, ax = plt.subplots(figsize=(8, 4.5))
-    bars = ax.bar(methods, speedups, color=colors, width=0.55)
+    ax.plot(methods, speedups, marker='o', linewidth=2.5, markersize=8, color='#2980b9', label='Speedup')
     ax.set_title("Practical 8: Speedup Factor relative to Sequential", fontsize=13, fontweight='bold')
+    ax.set_xlabel("Method", fontsize=11)
     ax.set_ylabel("Speedup Factor (x)", fontsize=11)
-    for bar in bars:
-        h = bar.get_height()
-        ax.text(bar.get_x() + bar.get_width()/2, h + 0.02, f"{h:.2f}x", ha='center', va='bottom', fontsize=10)
+    max_s = max(speedups) if speedups else 1.0
+    ax.set_ylim(0, max_s * 1.25)
+    for i, s in enumerate(speedups):
+        ax.text(i, s + (max_s * 0.02), f"{s:.2f}x", ha=\'center\', va=\'bottom\', fontsize=10, fontweight=\'bold\')
     ax.axhline(1.0, color='gray', linestyle='--', label='Baseline (1.0x)')
-    ax.grid(axis='y', linestyle='--', alpha=0.7)
+    ax.grid(True, linestyle='--', alpha=0.7)
+    ax.legend(loc='upper left')
     plt.tight_layout()
     plt.show()
 '''
@@ -1001,14 +1025,17 @@ if __name__ == '__main__':
     plt.show()
     
     fig, ax = plt.subplots(figsize=(8, 4.5))
-    bars = ax.bar(methods, speedups, color=colors, width=0.55)
+    ax.plot(methods, speedups, marker='o', linewidth=2.5, markersize=8, color='#2980b9', label='Speedup')
     ax.set_title("Practical 9: Speedup Factor relative to Sequential", fontsize=13, fontweight='bold')
+    ax.set_xlabel("Method", fontsize=11)
     ax.set_ylabel("Speedup Factor (x)", fontsize=11)
-    for bar in bars:
-        h = bar.get_height()
-        ax.text(bar.get_x() + bar.get_width()/2, h + 0.02, f"{h:.2f}x", ha='center', va='bottom', fontsize=10)
+    max_s = max(speedups) if speedups else 1.0
+    ax.set_ylim(0, max_s * 1.25)
+    for i, s in enumerate(speedups):
+        ax.text(i, s + (max_s * 0.02), f"{s:.2f}x", ha=\'center\', va=\'bottom\', fontsize=10, fontweight=\'bold\')
     ax.axhline(1.0, color='gray', linestyle='--', label='Baseline (1.0x)')
-    ax.grid(axis='y', linestyle='--', alpha=0.7)
+    ax.grid(True, linestyle='--', alpha=0.7)
+    ax.legend(loc='upper left')
     plt.tight_layout()
     plt.show()
 '''
@@ -1112,14 +1139,17 @@ if __name__ == '__main__':
     plt.show()
     
     fig, ax = plt.subplots(figsize=(8, 4.5))
-    bars = ax.bar(methods, speedups, color=colors, width=0.55)
+    ax.plot(methods, speedups, marker='o', linewidth=2.5, markersize=8, color='#2980b9', label='Speedup')
     ax.set_title("Practical 10: Speedup Factor relative to Sequential", fontsize=13, fontweight='bold')
+    ax.set_xlabel("Method", fontsize=11)
     ax.set_ylabel("Speedup Factor (x)", fontsize=11)
-    for bar in bars:
-        h = bar.get_height()
-        ax.text(bar.get_x() + bar.get_width()/2, h + 0.02, f"{h:.2f}x", ha='center', va='bottom', fontsize=10)
+    max_s = max(speedups) if speedups else 1.0
+    ax.set_ylim(0, max_s * 1.25)
+    for i, s in enumerate(speedups):
+        ax.text(i, s + (max_s * 0.02), f"{s:.2f}x", ha=\'center\', va=\'bottom\', fontsize=10, fontweight=\'bold\')
     ax.axhline(1.0, color='gray', linestyle='--', label='Baseline (1.0x)')
-    ax.grid(axis='y', linestyle='--', alpha=0.7)
+    ax.grid(True, linestyle='--', alpha=0.7)
+    ax.legend(loc='upper left')
     plt.tight_layout()
     plt.show()
 '''
