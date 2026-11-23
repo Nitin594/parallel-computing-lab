@@ -88,6 +88,36 @@ def main():
     for m, t, s in zip(methods, times, speedups):
         print(f"{m:<12} {t:.4f} seconds      {s:.2f}x")
     print("-" * 40)
+    
+    colors = ['#e74c3c', '#3498db', '#2ecc71', '#9b59b6']
+    plt.figure(figsize=(8, 5))
+    bars = plt.bar(methods, times, color=colors)
+    plt.title("Execution Time Comparison (Matrix Multiplication)", fontsize=13)
+    plt.ylabel("Time (seconds)", fontsize=11)
+    for bar in bars:
+        h = bar.get_height()
+        plt.text(bar.get_x() + bar.get_width()/2, h + 0.02, f"{h:.4f}s", ha='center', va='bottom', fontsize=10)
+    plt.grid(axis='y', linestyle='--', alpha=0.7)
+    plt.tight_layout()
+    plt.savefig("05_matrix_multiplication_time.png", dpi=150)
+    plt.close()
+    
+    plt.figure(figsize=(8, 5))
+    plt.plot(methods, speedups, marker='o', linewidth=2.5, markersize=8, color='#2980b9', label='Speedup')
+    plt.title("Speedup Comparison relative to Sequential", fontsize=13, fontweight='bold')
+    plt.xlabel("Method", fontsize=11)
+    plt.ylabel("Speedup Factor (x)", fontsize=11)
+    max_s = max(speedups) if speedups else 1.0
+    plt.ylim(0, max_s * 1.25)
+    for i, s in enumerate(speedups):
+        plt.text(i, s + (max_s * 0.02), f"{s:.2f}x", ha='center', va='bottom', fontsize=10, fontweight='bold')
+    plt.axhline(1.0, color='gray', linestyle='--', label='Baseline (1.0x)')
+    plt.grid(True, linestyle='--', alpha=0.7)
+    plt.legend(loc='upper left')
+    plt.tight_layout()
+    plt.savefig("05_matrix_multiplication_speedup.png", dpi=150)
+    plt.close()
+    print("Graphs saved as '05_matrix_multiplication_time.png' and '05_matrix_multiplication_speedup.png'.")
 
 if __name__ == "__main__":
     main()

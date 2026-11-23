@@ -11,12 +11,9 @@ import matplotlib.pyplot as plt
 def matrix_add_task(task):
     rows, cols, seed = task
     rng = np.random.default_rng(seed)
-    A = rng.integers(1, 100, size=(rows, cols), dtype=np.int32)
-    B = rng.integers(1, 100, size=(rows, cols), dtype=np.int32)
-    # Computational element-wise matrix arithmetic in C (releases GIL)
-    C = (A + B) * 3 + 1
-    C = np.bitwise_xor(C, A) + np.bitwise_and(C, B)
-    C = np.bitwise_xor(C * 41 + 23, C >> 3)
+    A = rng.integers(1, 100, size=(rows, cols))
+    B = rng.integers(1, 100, size=(rows, cols))
+    C = A + B
     return int(C[0, 0])
 
 def proc_worker(task, q):
@@ -27,9 +24,9 @@ def thread_worker(task, results, idx):
 
 def main():
     print("=" * 60)
-    print("Practical 4: Matrix Addition (Pattern 2 + Multithreading)")
+    print("Practical 4: Matrix Addition")
     print("=" * 60)
-    ROWS, COLS = 6500, 6500
+    ROWS, COLS = 5500, 5500
     tasks = [(ROWS, COLS, 101), (ROWS, COLS, 202), (ROWS, COLS, 303)]
     
     # 1. Sequential: Task 1 -> Task 2 -> Task 3
@@ -38,12 +35,11 @@ def main():
     r2 = matrix_add_task(tasks[1])
     r3 = matrix_add_task(tasks[2])
     t_seq = time.perf_counter() - t0
-    seq_res = [r1, r2, r3]
     
     # 2. Pool: 3 workers
     t0 = time.perf_counter()
     with mp.Pool(3) as pool:
-        pool_res = pool.map(matrix_add_task, tasks)
+        p_res = pool.map(matrix_add_task, tasks)
     t_pool = time.perf_counter() - t0
     
     # 3. Process: 3 independent processes
@@ -54,34 +50,69 @@ def main():
         p = mp.Process(target=proc_worker, args=(t, q))
         procs.append(p)
         p.start()
-    proc_res = [q.get() for _ in range(3)]
+    pr_res = [q.get() for _ in range(3)]
     for p in procs:
         p.join()
     t_proc = time.perf_counter() - t0
     
     # 4. Multithreading: 3 threads
-    thread_res = [None, None, None]
+    th_res = [None] * 3
     threads = []
     t0 = time.perf_counter()
-    for idx, t in enumerate(tasks):
-        th = threading.Thread(target=thread_worker, args=(t, thread_res, idx))
+    for i, t in enumerate(tasks):
+        th = threading.Thread(target=thread_worker, args=(t, th_res, i))
         threads.append(th)
         th.start()
     for th in threads:
         th.join()
     t_thread = time.perf_counter() - t0
     
-    print(f"Matrix Dimension: {ROWS}x{COLS} across 3 independent pairs.")
-    print(f"Verification: Sequential={seq_res[0]} | Thread={thread_res[0]}")
-    print("-" * 40)
-    print(f"{'Method':<12} {'Execution Time':<18} {'Speedup':<10}")
-    print("-" * 40)
+    print(f"Matrix Dimension: {ROWS}x{COLS} integers per task")
+    print(f"[Sequential] Sample: {r1} | Time: {t_seq:.4f}s")
+    print(f"[Pool]       Sample: {p_res[0]} | Time: {t_pool:.4f}s")
+    print(f"[Process]    Sample: {pr_res[0]} | Time: {t_proc:.4f}s")
+    print(f"[Thread]     Sample: {th_res[0]} | Time: {t_thread:.4f}s")
+    
     methods = ["Sequential", "Pool", "Process", "Thread"]
     times = [t_seq, t_pool, t_proc, t_thread]
     speedups = [t_seq / t for t in times]
+    
+    print("-" * 45)
+    print(f"{'Method':<12} {'Execution Time':<18} {'Speedup':<10}")
+    print("-" * 45)
     for m, t, s in zip(methods, times, speedups):
         print(f"{m:<12} {t:.4f} seconds      {s:.2f}x")
-    print("-" * 40)
+    print("-" * 45)
+    
+    colors = ['#e74c3c', '#3498db', '#2ecc71', '#9b59b6']
+    plt.figure(figsize=(8, 5))
+    bars = plt.bar(methods, times, color=colors)
+    plt.title("Execution Time Comparison (Matrix Addition)", fontsize=13)
+    plt.ylabel("Time (seconds)", fontsize=11)
+    for bar in bars:
+        h = bar.get_height()
+        plt.text(bar.get_x() + bar.get_width()/2, h + 0.02, f"{h:.4f}s", ha='center', va='bottom', fontsize=10)
+    plt.grid(axis='y', linestyle='--', alpha=0.7)
+    plt.tight_layout()
+    plt.savefig("04_matrix_addition_time.png", dpi=150)
+    plt.close()
+    
+    plt.figure(figsize=(8, 5))
+    plt.plot(methods, speedups, marker='o', linewidth=2.5, markersize=8, color='#2980b9', label='Speedup')
+    plt.title("Speedup Comparison relative to Sequential", fontsize=13, fontweight='bold')
+    plt.xlabel("Method", fontsize=11)
+    plt.ylabel("Speedup Factor (x)", fontsize=11)
+    max_s = max(speedups) if speedups else 1.0
+    plt.ylim(0, max_s * 1.25)
+    for i, s in enumerate(speedups):
+        plt.text(i, s + (max_s * 0.02), f"{s:.2f}x", ha='center', va='bottom', fontsize=10, fontweight='bold')
+    plt.axhline(1.0, color='gray', linestyle='--', label='Baseline (1.0x)')
+    plt.grid(True, linestyle='--', alpha=0.7)
+    plt.legend(loc='upper left')
+    plt.tight_layout()
+    plt.savefig("04_matrix_addition_speedup.png", dpi=150)
+    plt.close()
+    print("Graphs saved as '04_matrix_addition_time.png' and '04_matrix_addition_speedup.png'.")
 
 if __name__ == "__main__":
     main()

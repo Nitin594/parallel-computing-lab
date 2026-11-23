@@ -11,25 +11,10 @@ import matplotlib.pyplot as plt
 def count_primes_task(rng):
     start, end = rng
     nums = np.arange(start, end, dtype=np.int64)
-    is_p = (nums > 1)
-    if start <= 2 < end:
-        is_p[2 - start] = True
-    even_mask = (nums % 2 == 0) & (nums != 2)
-    is_p[even_mask] = False
-    
+    is_p = (nums > 1) & ((nums == 2) | (nums % 2 != 0))
     limit = int(end**0.5) + 1
-    div_sieve = np.ones(limit, dtype=bool)
-    div_sieve[:2] = False
-    for p in range(2, int(limit**0.5) + 1):
-        if div_sieve[p]:
-            div_sieve[p*p : limit : p] = False
-    primes = np.nonzero(div_sieve)[0]
-    primes = primes[primes >= 3]
-    
-    # Vectorized divisibility check in compiled C (releases GIL)
-    for p in primes:
-        mask = (nums % p == 0) & (nums != p)
-        is_p[mask] = False
+    for d in range(3, limit, 2):
+        is_p[(nums % d == 0) & (nums != d)] = False
     return int(np.count_nonzero(is_p))
 
 def proc_worker(rng, q):
@@ -42,64 +27,99 @@ def main():
     print("=" * 60)
     print("Practical 7: Prime Number Checking")
     print("=" * 60)
-    N = 2_500_000
-    step = N // 3
-    tasks = [(1, step), (step, 2 * step), (2 * step, N)]
+    N = 750_000
+    s = N // 3
+    ranges = [(1, s), (s, 2 * s), (2 * s, N + 1)]
     
     # 1. Sequential Execution
     t0 = time.perf_counter()
-    r1 = count_primes_task(tasks[0])
-    r2 = count_primes_task(tasks[1])
-    r3 = count_primes_task(tasks[2])
+    r1 = count_primes_task(ranges[0])
+    r2 = count_primes_task(ranges[1])
+    r3 = count_primes_task(ranges[2])
     t_seq = time.perf_counter() - t0
-    seq_primes = r1 + r2 + r3
+    primes_seq = r1 + r2 + r3
     
-    # 2. Multiprocessing Pool (3 workers)
+    # 2. Pool (3 workers)
     t0 = time.perf_counter()
     with mp.Pool(3) as pool:
-        p_res = pool.map(count_primes_task, tasks)
+        p_res = pool.map(count_primes_task, ranges)
     t_pool = time.perf_counter() - t0
-    pool_primes = sum(p_res)
+    primes_pool = sum(p_res)
     
-    # 3. Multiprocessing Process (3 processes)
+    # 3. Process (3 processes)
     q = mp.Queue()
     procs = []
     t0 = time.perf_counter()
-    for t in tasks:
-        p = mp.Process(target=proc_worker, args=(t, q))
+    for rng in ranges:
+        p = mp.Process(target=proc_worker, args=(rng, q))
         procs.append(p)
         p.start()
-    proc_res = [q.get() for _ in range(3)]
+    pr_res = [q.get() for _ in range(3)]
     for p in procs:
         p.join()
     t_proc = time.perf_counter() - t0
-    proc_primes = sum(proc_res)
+    primes_proc = sum(pr_res)
     
     # 4. Multithreading (3 threads)
-    thread_res = [None, None, None]
+    th_res = [None] * 3
     threads = []
     t0 = time.perf_counter()
-    for idx, t in enumerate(tasks):
-        th = threading.Thread(target=thread_worker, args=(t, thread_res, idx))
-        threads.append(th)
-        th.start()
-    for th in threads:
-        th.join()
+    for i, rng in enumerate(ranges):
+        t = threading.Thread(target=thread_worker, args=(rng, th_res, i))
+        threads.append(t)
+        t.start()
+    for t in threads:
+        t.join()
     t_thread = time.perf_counter() - t0
-    thread_primes = sum(thread_res)
+    primes_thread = sum(th_res)
     
-    print(f"Total Range: 1 to {N:,}")
-    print(f"Verification: Seq={seq_primes:,} | Thread={thread_primes:,}")
-    print(f"Results Match: {seq_primes == thread_primes}")
-    print("-" * 40)
-    print(f"{'Method':<12} {'Execution Time':<18} {'Speedup':<10}")
-    print("-" * 40)
+    print(f"Total primes found up to {N:,}: {primes_seq:,}")
+    print(f"Match verified: {primes_seq == primes_pool == primes_proc == primes_thread}")
+    print(f"[Sequential] Time: {t_seq:.4f}s")
+    print(f"[Pool]       Time: {t_pool:.4f}s")
+    print(f"[Process]    Time: {t_proc:.4f}s")
+    print(f"[Thread]     Time: {t_thread:.4f}s")
+    
     methods = ["Sequential", "Pool", "Process", "Thread"]
     times = [t_seq, t_pool, t_proc, t_thread]
     speedups = [t_seq / t for t in times]
+    
+    print("-" * 45)
+    print(f"{'Method':<12} {'Execution Time':<18} {'Speedup':<10}")
+    print("-" * 45)
     for m, t, s in zip(methods, times, speedups):
         print(f"{m:<12} {t:.4f} seconds      {s:.2f}x")
-    print("-" * 40)
+    print("-" * 45)
+    
+    colors = ['#e74c3c', '#3498db', '#2ecc71', '#9b59b6']
+    plt.figure(figsize=(8, 5))
+    bars = plt.bar(methods, times, color=colors)
+    plt.title("Execution Time Comparison (Prime Number Checking)", fontsize=13)
+    plt.ylabel("Time (seconds)", fontsize=11)
+    for bar in bars:
+        h = bar.get_height()
+        plt.text(bar.get_x() + bar.get_width()/2, h + 0.02, f"{h:.4f}s", ha='center', va='bottom', fontsize=10)
+    plt.grid(axis='y', linestyle='--', alpha=0.7)
+    plt.tight_layout()
+    plt.savefig("07_prime_numbers_time.png", dpi=150)
+    plt.close()
+    
+    plt.figure(figsize=(8, 5))
+    plt.plot(methods, speedups, marker='o', linewidth=2.5, markersize=8, color='#2980b9', label='Speedup')
+    plt.title("Speedup Comparison relative to Sequential", fontsize=13, fontweight='bold')
+    plt.xlabel("Method", fontsize=11)
+    plt.ylabel("Speedup Factor (x)", fontsize=11)
+    max_s = max(speedups) if speedups else 1.0
+    plt.ylim(0, max_s * 1.25)
+    for i, s in enumerate(speedups):
+        plt.text(i, s + (max_s * 0.02), f"{s:.2f}x", ha='center', va='bottom', fontsize=10, fontweight='bold')
+    plt.axhline(1.0, color='gray', linestyle='--', label='Baseline (1.0x)')
+    plt.grid(True, linestyle='--', alpha=0.7)
+    plt.legend(loc='upper left')
+    plt.tight_layout()
+    plt.savefig("07_prime_numbers_speedup.png", dpi=150)
+    plt.close()
+    print("Graphs saved as '07_prime_numbers_time.png' and '07_prime_numbers_speedup.png'.")
 
 if __name__ == "__main__":
     main()
